@@ -4,6 +4,7 @@
 //#include <enet/enet.h>
 #include <iostream>
 #include "Infrastructure.h"
+#include "User.h"
 using namespace std;
 // ===== Add the two library below ===== 
 //	Winmm.lib
@@ -30,10 +31,25 @@ int main(int argc, char** argv)
 	}
 
 	else if (serverChoice == 2) {
-		bool statusKeepLive = Infrastructure::DidCreateServer(serverChoice);
-		if (statusKeepLive) {
-			Infrastructure::KeepConnectionLive(statusKeepLive, serverChoice);
+		string username;
+		string fullname;
+		cout << "Please provide your preferred nickname\n" << endl;
+		cin >> username;
+		if (!username.empty()) {
+			User::SetUserName(username);
+			cout << "Please provide your preferred fullname\n" << endl;
+			cin >> fullname;
+			User::SetFullName(fullname);
+			bool statusKeepLive = Infrastructure::DidCreateServer(serverChoice);
+			if (statusKeepLive) {
+				User::SetSessionIsActive(Online);
+				Infrastructure::KeepConnectionLive(statusKeepLive, serverChoice);
+			}
 		}
+		else {
+			cout << "You need a name to access the chat server\n" << endl;
+		}
+		
 	}
 
 	return EXIT_SUCCESS;

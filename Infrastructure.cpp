@@ -1,5 +1,10 @@
 #include "Infrastructure.h"
-
+#include "User.h"
+#include <format>
+void Callback(void* data) {
+	std::string& s = *(static_cast<std::string*>(data));
+	std::cout << s;
+}
 bool Infrastructure::DidCreateServer(ServerType serverType)
 {
 	return GetInstance().CreateServer(serverType);
@@ -88,6 +93,7 @@ void Infrastructure::SendPackets(ENetEvent &event)
 {
 	while (enet_host_service(server, &event, 1000) > 0)
 	{
+		std::string s(User::GetUsername());
 		switch (event.type)
 		{
 		case ENET_EVENT_TYPE_CONNECT:
@@ -97,13 +103,19 @@ void Infrastructure::SendPackets(ENetEvent &event)
 				<< ":" << event.peer->address.port
 				<< endl;
 			/* Store any relevant client information here. */
-			event.peer->data = (void*)("Client information");
+		
+			event.peer->data = (void*)(static_cast<void*>(&s));
 
 			{
 				/* Create a reliable packet of size 7 containing "packet\0" */
 				//TODO Take user input and send as the packet to be received
-				ENetPacket* packet = enet_packet_create("hello",
-					strlen("hello") + 1,
+				string greeting = "Hello, " + User::GetUsername() +"!";
+				void* p;
+				p = &greeting;
+				
+				
+				ENetPacket* packet = enet_packet_create(User::GetUsername().c_str(),
+					greeting.length() + 1,
 					ENET_PACKET_FLAG_RELIABLE);
 				enet_host_broadcast(server, 0, packet);
 				enet_host_flush(server);
@@ -112,14 +124,14 @@ void Infrastructure::SendPackets(ENetEvent &event)
 		case ENET_EVENT_TYPE_RECEIVE:
 			cout << "A packet of length "
 				<< event.packet->dataLength << endl
-				<< "containing " << (char*)event.packet->data
+				<< "containing " << (string*)event.packet->data
 				<< endl;
 			enet_packet_destroy(event.packet);
 
 			break;
 
 		case ENET_EVENT_TYPE_DISCONNECT:
-			cout << (char*)event.peer->data << "disconnected." << endl;
+			cout << (string*)event.peer->data << "disconnected." << endl;
 			/* Reset the peer's client information. */
 			event.peer->data = NULL;
 		}
@@ -135,15 +147,19 @@ void Infrastructure::ReceivePackets(ENetEvent& event)
 		case ENET_EVENT_TYPE_RECEIVE:
 			cout << "A packet of length "
 				<< event.packet->dataLength << endl
-				<< "containing " << (char*)event.packet->data
+				<< "containing " << (string*)event.packet->data
 				<< endl;
 			/* Clean up the packet now that we're done using it. */
 			enet_packet_destroy(event.packet);
 
 			{
 				/* Create a reliable packet of size 7 containing "packet\0" */
-				ENetPacket* packet = enet_packet_create("hi",
-					strlen("hi") + 1,
+				void* p;
+
+				std::string s(User::GetUsername());
+			/*	p = Callback(static_cast<void*>(&s));*/
+				ENetPacket* packet = enet_packet_create(User::GetUsername().c_str(),
+					strlen(User::GetUsername().c_str()) + 1,
 					ENET_PACKET_FLAG_RELIABLE);
 
 				enet_host_broadcast(client, 0, packet);
