@@ -21,10 +21,19 @@ int main(int argc, char** argv)
 	int UserInput;
 	cin >> UserInput;
 	auto serverChoice = Infrastructure::UserServerChoice(UserInput);
-	bool statusKeepLive = Infrastructure::DidCreateServer(serverChoice);
-	if (statusKeepLive) {
-		Infrastructure::KeepConnectionLive(statusKeepLive);
-		cout << "Server was created\n" << endl;
+	if (serverChoice == 1) {
+		bool statusKeepLive = Infrastructure::DidCreateServer(serverChoice);
+		if (statusKeepLive) {
+			Infrastructure::KeepConnectionLive(statusKeepLive,serverChoice);
+			cout << "Server was created\n" << endl;
+		}
+	}
+
+	else if (serverChoice == 2) {
+		bool statusKeepLive = Infrastructure::DidCreateServer(serverChoice);
+		if (statusKeepLive) {
+			Infrastructure::KeepConnectionLive(statusKeepLive, serverChoice);
+		}
 	}
 	//if (UserInput == 1)
 	//{

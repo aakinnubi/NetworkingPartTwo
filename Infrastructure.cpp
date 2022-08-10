@@ -28,7 +28,6 @@ void Infrastructure::HandleClientInput(string message)
 
 ServerType Infrastructure::UserServerChoice(int userChoice)
 {
-	userChoice = userChoice - 1;
 	if (userChoice == ServerType::Client) {
 		return ServerType::Client;
 	}
@@ -46,12 +45,26 @@ void Infrastructure::Initializer()
 	atexit(enet_deinitialize);
 }
 
-void Infrastructure::KeepConnectionLive(bool status)
+void Infrastructure::KeepConnectionLive(bool status, ServerType connectionType)
 {
-	while (status) {
-		//ENetEvent _event;
-		GetInstance().SendPackets(GetInstance().event);
+	switch (connectionType)
+	{
+	case Server:
+		while (status) {
+			//ENetEvent _event;
+			GetInstance().SendPackets(GetInstance().event);
+		}
+		break;
+	case Client:
+		GetInstance().ConnectToPeers();
+		while (status) {
+			GetInstance().ReceivePackets(GetInstance().event);
+		}
+		break;
+	default:
+		break;
 	}
+	
 }
 
 bool Infrastructure::CreateServer(ServerType serverType)

@@ -4,8 +4,8 @@
 using namespace std;
 enum ServerType
 {
-	Server,
-	Client
+	Server =1,
+	Client =2
 };
 class Infrastructure {
 	Infrastructure() {
@@ -31,18 +31,18 @@ public:
 	static void HandleClientInput(string message);
 	static ServerType UserServerChoice(int userChoice);
 	static void Initializer();
-	static void KeepConnectionLive(bool status);
+	static void KeepConnectionLive(bool status, ServerType connectionType);
 private:
 
 	bool CreateServer(ServerType serverType);
 	void SendPackets(ENetEvent& event);
 	void ReceivePackets(ENetEvent& event);
 	void ConnectToPeers();
-	ENetAddress address;
+	ENetAddress address = {};
 	ENetHost* server = nullptr;
 	ENetHost* client = nullptr;
-	ENetEvent event;
-	ENetPeer* peer;
+	ENetEvent event = {};
+	ENetPeer* peer = nullptr;
 	const string HELLO = "hello";
 	const string CLIENT = "Client> ";
 	const string SERVER = "Server> ";
