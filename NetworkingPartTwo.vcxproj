@@ -136,7 +136,6 @@
   <ItemGroup>
     <ClInclude Include="Chat.h" />
     <ClInclude Include="Infrastructure.h" />
-    <ClInclude Include="NetworkingPartTwo.h" />
     <ClInclude Include="User.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
