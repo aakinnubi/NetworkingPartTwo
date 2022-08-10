@@ -91,6 +91,7 @@ void Infrastructure::SendPackets(ENetEvent &event)
 		switch (event.type)
 		{
 		case ENET_EVENT_TYPE_CONNECT:
+			//TODO: Notify the server the name of the new logged in user
 			cout << "A new client connected from "
 				<< event.peer->address.host
 				<< ":" << event.peer->address.port
@@ -100,6 +101,7 @@ void Infrastructure::SendPackets(ENetEvent &event)
 
 			{
 				/* Create a reliable packet of size 7 containing "packet\0" */
+				//TODO Take user input and send as the packet to be received
 				ENetPacket* packet = enet_packet_create("hello",
 					strlen("hello") + 1,
 					ENET_PACKET_FLAG_RELIABLE);

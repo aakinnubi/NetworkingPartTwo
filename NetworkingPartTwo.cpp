@@ -35,43 +35,6 @@ int main(int argc, char** argv)
 			Infrastructure::KeepConnectionLive(statusKeepLive, serverChoice);
 		}
 	}
-	//if (UserInput == 1)
-	//{
-
-
-	//	while (1)
-	//	{
-	//		//ENetEvent event;
-	//		///* Wait up to 1000 milliseconds for an event. */
-	//		//SendPackets(event);
-	//	}
-
-	//}
-	//else if (UserInput == 2)
-	//{
-
-	//	/*	ConnectToPeers();*/
-
-	//	while (1)
-	//	{
-
-	//	}
-	//}
-	//else
-	//{
-	//	cout << "Invalid Input" << endl;
-	//}
-
-	//if (server != nullptr)
-	//{
-	//	enet_host_destroy(server);
-	//}
-
-	//if (client != nullptr)
-	//{
-	//	enet_host_destroy(client);
-	//}
-
 
 	return EXIT_SUCCESS;
 }
