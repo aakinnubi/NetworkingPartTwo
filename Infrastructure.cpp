@@ -92,7 +92,7 @@ void Infrastructure::SendPackets(ENetEvent& event)
 {
 	while (enet_host_service(server, &event, 1000) > 0)
 	{
-		std::string s(User::GetUsername());
+		string s(User::GetUsername());
 		switch (event.type)
 		{
 		case ENET_EVENT_TYPE_CONNECT:
@@ -155,7 +155,7 @@ void Infrastructure::ReceivePackets(ENetEvent& event)
 				/* Create a reliable packet of size 7 containing "packet\0" */
 				void* p;
 
-				std::string s(User::GetUsername());
+				string s(User::GetUsername());
 				/*	p = Callback(static_cast<void*>(&s));*/
 				ENetPacket* packet = enet_packet_create(User::GetUsername().c_str(),
 					strlen(User::GetUsername().c_str()) + 1,
@@ -219,29 +219,27 @@ void Infrastructure::SetupChatroomDisplay()
 	GetInstance().g_currentLogXPos = GetInstance().g_kLogStartXPos;
 	GetInstance().g_currentLogYPos = GetInstance().g_kLogStartYPos + 1;
 
-	std::cout << "Welcome to the chat room!" << std::endl;
+	cout << "Welcome to the chat room!" << endl;
 }
-void Infrastructure::ClientInput(std::string message, std::function<bool(std::string)> func, std::string& storage)
+void Infrastructure::ClientInput(string message, function<bool(string)> func, string& storage)
 {
-	std::string input;
+	string input;
 	bool exit = false;
 
 	do
 	{
-		std::cout << message;
-		getline(std::cin, input);
+		cout << message;
+		getline(cin, input);
 		GetInstance().EraseConsoleLine();
 
-		if (std::cin.fail() || func(input) == false)
+		if (cin.fail() || func(input) == false)
 		{
-			std::cin.clear();
-			std::cin.sync();
-			//std::cin.ignore(INT_MAX, '\n');
+			cin.clear();
+			cin.sync();
 			input = "";
-
 			GetInstance().RepositionInputCursor(true);
-			//std::cout << "\x1b[1F";
-			//std::cout << "\x1b[2K";
+			//cout << "\x1b[1F";
+			//cout << "\x1b[2K";
 		}
 		else
 		{
@@ -277,17 +275,17 @@ void Infrastructure::RepositionInputCursor(bool initial)
 
 void Infrastructure::EraseConsoleLine()
 {
-	std::cout << "\33[2K";// Delete current line
+	cout << "\33[2K";// Delete current line
 	// i=1 because we included the first line
-	std::cout
+	cout
 		<< "\33[1A" // Move cursor up one
 		<< "\33[2K"; // Delete the entire line
-	std::cout << "\r"; // Resume the cursor at beginning of line
+	cout << "\r"; // Resume the cursor at beginning of line
 }
 
-string Infrastructure::GetUsernameInputFormatted(std::string username)
+string Infrastructure::GetUsernameInputFormatted(string username)
 {
-	std::string message = "";
+	string message = "";
 
 	message += "@" + username + "] >> ";
 	GetInstance().SetClientInputLength(message);
@@ -322,11 +320,11 @@ void Infrastructure::AddMessageToLog(string message)
 	}
 
 	SetConsoleCursorPosition(h, c);
-	std::cout << message;
+	cout << message;
 	GetInstance().g_currentLogYPos++;
 
 	GetInstance().RepositionInputCursor(true);
-	std::cout << GetInstance().GetUsernameInputFormatted(User::GetUsername());
+	cout << GetInstance().GetUsernameInputFormatted(User::GetUsername());
 }
 
 
@@ -336,7 +334,7 @@ void Infrastructure::LogQueueThread()
 	{
 		if (GetInstance().GetIsConnected() && GetInstance().GetQueueMessageSize() > 0)
 		{
-			std::lock_guard<std::mutex> consoleDrawGuard(GetInstance().consoleDrawer);
+			lock_guard<mutex> consoleDrawGuard(GetInstance().consoleDrawer);
 			GetInstance().AddMessageToLog(GetInstance().GetLogQueuePop());
 		}
 	}

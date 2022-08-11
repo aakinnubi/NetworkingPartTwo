@@ -37,11 +37,11 @@ public:
 	static void KeepConnectionLive(bool status, ServerType connectionType);
 	static void EraseConsoleLine();
 	static void RepositionInputCursor(bool initial = false);
-	static void ClientInput(string message, std::function<bool(std::string)> func, string& storage);
+	static void ClientInput(string message, function<bool(string)> func, string& storage);
 	static void SetupChatroomDisplay();
 	static void AddMessageToLog(string message);
 	static void AddMessageToLogQueue(string message);
-	static string GetUsernameInputFormatted(std::string username);
+	static string GetUsernameInputFormatted(string username);
 	static void LogQueueThread();
 	static void SetLogQueue(string message) {
 		GetInstance().newLogsQueue.push(message);
