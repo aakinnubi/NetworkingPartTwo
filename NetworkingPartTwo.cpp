@@ -59,8 +59,10 @@ int main(int argc, char** argv)
 			if (statusKeepLive) {
 				User::SetSessionIsActive(Online);
 				Infrastructure::ConnectedToPeers();
-				Infrastructure::WaitForUserInputThread(statusKeepLive, serverChoice);
 				Infrastructure::SetupChatroomDisplay();
+				//Infrastructure::WaitForUserInputThread(statusKeepLive, serverChoice);
+				std::thread inputThread(Infrastructure::WaitForUserInputThread, statusKeepLive, serverChoice);
+				std::thread logQueueThread(Infrastructure::LogQueueThread);
 			}
 		}
 		else {

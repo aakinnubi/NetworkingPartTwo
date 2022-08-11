@@ -222,6 +222,7 @@ void Infrastructure::Initializer()
 
 void Infrastructure::KeepConnectionLive(bool status, ServerType connectionType)
 {
+	GetInstance().RepositionInputCursor(status);
 	switch (connectionType)
 	{
 	case Server:
