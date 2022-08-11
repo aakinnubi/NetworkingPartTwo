@@ -43,6 +43,7 @@ public:
 	static void AddMessageToLogQueue(string message);
 	static string GetUsernameInputFormatted(string username);
 	static void LogQueueThread();
+	static void WaitForUserInputThread(bool statusKeepLive, ServerType connectionType);
 	static void SetLogQueue(string message) {
 		GetInstance().newLogsQueue.push(message);
 	}
@@ -60,6 +61,7 @@ public:
 	static int GetClientInputLength() {
 		return GetInstance().clientInputLength;
 	}
+	static void ConnectedToPeers();
 	static void SetIsConnected(bool status) {
 		GetInstance().isConnected = status;
 	}
@@ -92,4 +94,10 @@ private:
 	const string SERVER = "Server> ";
 	const string HOST = "127.0.0.1";
 	const int PORT = 1234;
+	const char* ClientDefaultErrorMessage = "An error occurred while trying to create an ENet client host.\n";
+	const char* InfrastructureInitializingErrorMessage = "An error occurred while initializing ENet.\n";
+	const char* PeerAvialableMessage = "No available peers for initiating an ENet connection.\n";
+
+	const char* ConnectionSuccess = "Connection to 127.0.0.1:1234 succeeded.";
+	const char* ConnectionFailure = "Connection 127.0.0.1:1234 failed.";
 };

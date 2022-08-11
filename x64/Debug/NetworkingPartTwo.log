@@ -1,4 +1,8 @@
-﻿  NetworkingPartTwo.cpp
-C:\Users\aakinnubi\source\repos\NetworkingPartTwo\Infrastructure.h(55,1): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\aakinnubi\source\repos\NetworkingPartTwo\Infrastructure.h(58,1): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+﻿  Infrastructure.cpp
+C:\Users\aakinnubi\source\repos\NetworkingPartTwo\Infrastructure.h(56,1): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\aakinnubi\source\repos\NetworkingPartTwo\Infrastructure.h(59,1): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+  The contents of <format> are available only with C++20 or later.
+C:\Users\aakinnubi\source\repos\NetworkingPartTwo\Infrastructure.cpp(110,27): warning C4838: conversion from 'int' to 'SHORT' requires a narrowing conversion
+C:\Users\aakinnubi\source\repos\NetworkingPartTwo\Infrastructure.cpp(110,59): warning C4838: conversion from 'int' to 'SHORT' requires a narrowing conversion
+C:\Users\aakinnubi\source\repos\NetworkingPartTwo\Infrastructure.cpp(325,11): warning C4101: 'p': unreferenced local variable
   NetworkingPartTwo.vcxproj -> C:\Users\aakinnubi\source\repos\NetworkingPartTwo\x64\Debug\NetworkingPartTwo.exe

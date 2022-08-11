@@ -30,7 +30,7 @@ int main(int argc, char** argv)
 
 	cout << "1) Create Server " << endl;
 	cout << "2) Create Client " << endl;
-	int UserInput;
+	int UserInput;	
 	cin >> UserInput;
 	auto serverChoice = Infrastructure::UserServerChoice(UserInput);
 	if (serverChoice == 1) {
@@ -52,11 +52,14 @@ int main(int argc, char** argv)
 			cin >> fullname_;
 			User::SetFullName(fullname_);
 			/*	usernameCharLength = username.length();*/
-
+			string userName = "";
+			userName= User::GetUsername();
+			Infrastructure::ClientInput("Please provide your preferred fullname", [](std::string input) { return input != ""; }, userName);
 			bool statusKeepLive = Infrastructure::DidCreateServer(serverChoice);
 			if (statusKeepLive) {
 				User::SetSessionIsActive(Online);
-				Infrastructure::KeepConnectionLive(statusKeepLive, serverChoice);
+				Infrastructure::ConnectedToPeers();
+				Infrastructure::WaitForUserInputThread(statusKeepLive, serverChoice);
 				Infrastructure::SetupChatroomDisplay();
 			}
 		}
