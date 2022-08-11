@@ -1,0 +1,4 @@
+﻿  NetworkingPartTwo.cpp
+C:\Users\aakinnubi\source\repos\NetworkingPartTwo\Infrastructure.h(55,1): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\aakinnubi\source\repos\NetworkingPartTwo\Infrastructure.h(58,1): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+  NetworkingPartTwo.vcxproj -> C:\Users\aakinnubi\source\repos\NetworkingPartTwo\x64\Debug\NetworkingPartTwo.exe

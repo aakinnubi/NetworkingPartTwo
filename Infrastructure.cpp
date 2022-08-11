@@ -1,10 +1,10 @@
 #include "Infrastructure.h"
 #include "User.h"
 #include <format>
-void Callback(void* data) {
-	std::string& s = *(static_cast<std::string*>(data));
-	std::cout << s;
-}
+#include <functional>
+
+
+
 bool Infrastructure::DidCreateServer(ServerType serverType)
 {
 	return GetInstance().CreateServer(serverType);
@@ -22,13 +22,13 @@ void Infrastructure::ReceivePacketsWrapper()
 
 void Infrastructure::HandleServerInput(string message)
 {
-	return ;
+	return;
 }
 
 void Infrastructure::HandleClientInput(string message)
 {
-	
-	return ;
+
+	return;
 }
 
 ServerType Infrastructure::UserServerChoice(int userChoice)
@@ -69,9 +69,8 @@ void Infrastructure::KeepConnectionLive(bool status, ServerType connectionType)
 	default:
 		break;
 	}
-	
-}
 
+}
 bool Infrastructure::CreateServer(ServerType serverType)
 {
 	switch (serverType)
@@ -89,7 +88,7 @@ bool Infrastructure::CreateServer(ServerType serverType)
 	}
 }
 
-void Infrastructure::SendPackets(ENetEvent &event)
+void Infrastructure::SendPackets(ENetEvent& event)
 {
 	while (enet_host_service(server, &event, 1000) > 0)
 	{
@@ -103,17 +102,17 @@ void Infrastructure::SendPackets(ENetEvent &event)
 				<< ":" << event.peer->address.port
 				<< endl;
 			/* Store any relevant client information here. */
-		
+
 			event.peer->data = (void*)(static_cast<void*>(&s));
 
 			{
 				/* Create a reliable packet of size 7 containing "packet\0" */
 				//TODO Take user input and send as the packet to be received
-				string greeting = "Hello, " + User::GetUsername() +"!";
+				string greeting = "Hello, " + User::GetUsername() + "!";
 				void* p;
 				p = &greeting;
-				
-				
+
+
 				ENetPacket* packet = enet_packet_create(User::GetUsername().c_str(),
 					greeting.length() + 1,
 					ENET_PACKET_FLAG_RELIABLE);
@@ -157,7 +156,7 @@ void Infrastructure::ReceivePackets(ENetEvent& event)
 				void* p;
 
 				std::string s(User::GetUsername());
-			/*	p = Callback(static_cast<void*>(&s));*/
+				/*	p = Callback(static_cast<void*>(&s));*/
 				ENetPacket* packet = enet_packet_create(User::GetUsername().c_str(),
 					strlen(User::GetUsername().c_str()) + 1,
 					ENET_PACKET_FLAG_RELIABLE);
@@ -200,4 +199,150 @@ void Infrastructure::ConnectToPeers()
 		cout << "Connection to 127.0.0.1:1234 failed." << endl;
 	}
 }
+
+
+
+
+
+void Infrastructure::SetupChatroomDisplay()
+{
+	HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+	DWORD consoleMode;
+	GetConsoleMode(h, &consoleMode);
+	consoleMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+	SetConsoleMode(h, consoleMode);
+
+
+	COORD c = { GetInstance().g_kLogStartXPos, GetInstance().g_kLogStartYPos };
+	SetConsoleCursorPosition(h, c);
+
+	GetInstance().g_currentLogXPos = GetInstance().g_kLogStartXPos;
+	GetInstance().g_currentLogYPos = GetInstance().g_kLogStartYPos + 1;
+
+	std::cout << "Welcome to the chat room!" << std::endl;
+}
+void Infrastructure::ClientInput(std::string message, std::function<bool(std::string)> func, std::string& storage)
+{
+	std::string input;
+	bool exit = false;
+
+	do
+	{
+		std::cout << message;
+		getline(std::cin, input);
+		GetInstance().EraseConsoleLine();
+
+		if (std::cin.fail() || func(input) == false)
+		{
+			std::cin.clear();
+			std::cin.sync();
+			//std::cin.ignore(INT_MAX, '\n');
+			input = "";
+
+			GetInstance().RepositionInputCursor(true);
+			//std::cout << "\x1b[1F";
+			//std::cout << "\x1b[2K";
+		}
+		else
+		{
+			storage = input;
+			exit = true;
+		}
+
+	} while (!exit);
+}
+void Infrastructure::RepositionInputCursor(bool initial)
+{
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+
+	HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+	GetConsoleScreenBufferInfo(h, &csbi);
+
+	int bottomRow = csbi.srWindow.Bottom - 1;
+	COORD c = { 0, 0 };
+
+	if (initial)
+	{
+		c.X = 0;
+		c.Y = bottomRow;
+	}
+	else
+	{
+		c.X = GetInstance().usernameCharLength;
+		c.Y = bottomRow;
+	}
+
+	SetConsoleCursorPosition(h, c);
+}
+
+void Infrastructure::EraseConsoleLine()
+{
+	std::cout << "\33[2K";// Delete current line
+	// i=1 because we included the first line
+	std::cout
+		<< "\33[1A" // Move cursor up one
+		<< "\33[2K"; // Delete the entire line
+	std::cout << "\r"; // Resume the cursor at beginning of line
+}
+
+string Infrastructure::GetUsernameInputFormatted(std::string username)
+{
+	std::string message = "";
+
+	message += "@" + username + "] >> ";
+	GetInstance().SetClientInputLength(message);
+	return message;
+}
+
+void Infrastructure::AddMessageToLogQueue(string message)
+{
+	GetInstance().SetLogQueue(message);
+}
+
+void Infrastructure::AddMessageToLog(string message)
+{
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+
+	HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+	GetConsoleScreenBufferInfo(h, &csbi);
+
+	COORD c = { GetInstance().g_currentLogXPos, GetInstance().g_currentLogYPos };
+
+	if ((csbi.srWindow.Bottom - 3) == GetInstance().g_currentLogYPos)
+	{
+		SMALL_RECT srctWindow;
+
+		srctWindow.Top = csbi.srWindow.Top + 1;
+		srctWindow.Bottom = csbi.srWindow.Bottom + 1;
+		srctWindow.Left = 0;
+		srctWindow.Right = csbi.srWindow.Right;
+
+		SetConsoleWindowInfo(h, TRUE, &srctWindow);
+		GetInstance().EraseConsoleLine();
+	}
+
+	SetConsoleCursorPosition(h, c);
+	std::cout << message;
+	GetInstance().g_currentLogYPos++;
+
+	GetInstance().RepositionInputCursor(true);
+	std::cout << GetInstance().GetUsernameInputFormatted(User::GetUsername());
+}
+
+
+void Infrastructure::LogQueueThread()
+{
+	while (true)
+	{
+		if (GetInstance().GetIsConnected() && GetInstance().GetQueueMessageSize() > 0)
+		{
+			std::lock_guard<std::mutex> consoleDrawGuard(GetInstance().consoleDrawer);
+			GetInstance().AddMessageToLog(GetInstance().GetLogQueuePop());
+		}
+	}
+}
+
+
+
+
 

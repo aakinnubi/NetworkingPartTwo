@@ -5,12 +5,23 @@
 #include <iostream>
 #include "Infrastructure.h"
 #include "User.h"
+#include <functional>
+#include <queue>
 using namespace std;
 // ===== Add the two library below ===== 
 //	Winmm.lib
 //Ws2_32.lib
 // END OF    ==== = Add the two library below ==== =
-
+//This is meant to run locally, launch the server, and do the following :
+//
+//Ask the user to input a name
+//Wait for a client to connect
+//Launch a client
+//Ask the user to input a name
+//Connect to the server
+//Run a loop based on a quit condition of your liking(ie the user types in 'quit')
+//Any message the user enters will be sent to the host or client, depending on who is sending it
+//The window of the hostand client will display the user nameand the ms
 
 int main(int argc, char** argv)
 {
@@ -25,43 +36,37 @@ int main(int argc, char** argv)
 	if (serverChoice == 1) {
 		bool statusKeepLive = Infrastructure::DidCreateServer(serverChoice);
 		if (statusKeepLive) {
-			Infrastructure::KeepConnectionLive(statusKeepLive,serverChoice);
+			Infrastructure::KeepConnectionLive(statusKeepLive, serverChoice);
 			cout << "Server was created\n" << endl;
 		}
 	}
 
 	else if (serverChoice == 2) {
-		string username;
-		string fullname;
+		string username_;
+		string fullname_;
 		cout << "Please provide your preferred nickname\n" << endl;
-		cin >> username;
-		if (!username.empty()) {
-			User::SetUserName(username);
+		cin >> username_;
+		if (!username_.empty()) {
+			User::SetUserName(username_);
 			cout << "Please provide your preferred fullname\n" << endl;
-			cin >> fullname;
-			User::SetFullName(fullname);
+			cin >> fullname_;
+			User::SetFullName(fullname_);
+			/*	usernameCharLength = username.length();*/
+
 			bool statusKeepLive = Infrastructure::DidCreateServer(serverChoice);
 			if (statusKeepLive) {
 				User::SetSessionIsActive(Online);
 				Infrastructure::KeepConnectionLive(statusKeepLive, serverChoice);
+				Infrastructure::SetupChatroomDisplay();
 			}
 		}
 		else {
 			cout << "You need a name to access the chat server\n" << endl;
 		}
-		
+
 	}
 
 	return EXIT_SUCCESS;
 }
 
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
 
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
