@@ -5,18 +5,18 @@
 #include <mutex>
 #include <functional>
 class Infrastructure {
-	Infrastructure() {
-		client = nullptr;
-	}
-	~Infrastructure() {
+	//Infrastructure() {
+	//	client = nullptr;
+	//}
+	/*~Infrastructure() {
 
-	}
+	}*/
 public:
 
 
 	const short kLogStartXPos = 0;
 	const short kLogStartYPos = 7;
-	std::queue<std::string> newLogsQueue;
+	std::queue<std::string> nameEntryQueue;
 	Infrastructure(Infrastructure& other) = delete;
 	static Infrastructure& GetInstance() {
 		static Infrastructure infrastructure;
@@ -30,16 +30,19 @@ public:
 
 	//static void UserInputThread();
 	static void SetQueues(std::string queueItem) {
-		GetInstance().newLogsQueue.push(queueItem);
+		Infrastructure::GetInstance().newLogsQueue.push(queueItem);
 	}
+	//static void SetQueues(std::queue<std::string> queueItem) {
+	//	GetInstance().newLogsQueue.;
+	//}
 	static int GetQueueSize() {
-		return GetInstance().newLogsQueue.size();
+		return Infrastructure::GetInstance().newLogsQueue.size();
 	}
 	static std::string GetQueueItem() {
-		return GetInstance().newLogsQueue.front();
+		return Infrastructure::GetInstance().newLogsQueue.front();
 	}
 	static void RemoveQueueItem() {
-		GetInstance().newLogsQueue.pop();
+		Infrastructure::GetInstance().newLogsQueue.pop();
 	}
 	static void SendPacket();
 	static void RepositionInputCursor(bool initial);
@@ -84,5 +87,7 @@ private:
 	bool connectedToServer = false;
 	int currentLogXPos = 0;
 	int currentLogYPos = 0;
+	Infrastructure() {};
+	std::queue<std::string> newLogsQueue;
 
 };

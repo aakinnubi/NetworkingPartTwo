@@ -3,6 +3,7 @@
 #include <string>
 #include <functional>
 std::mutex _consoleDraw;
+std::queue<std::string> messagesEntries;
 bool Infrastructure::CreateClient()
 {
    auto client_ = enet_host_create(NULL /* create a client host */,
@@ -47,6 +48,9 @@ void Infrastructure::UserInput(std::string message, std::function<bool(std::stri
         }
         else
         {
+            GetInstance().SetClientUserName(input);
+
+            std::cout << GetInstance().GetClientUserName() << std::endl;
             storage = input;
             exit = true;
         }
@@ -103,7 +107,7 @@ std::string Infrastructure::GetUsernameInputFormatted(std::string username)
 {
     std::string message = "";
 
-    message += "@" + username + "\n" + "";
+    message += "@" + username + ": " + "";
 
     GetInstance().SetClientUserNameInputLength(message.length());
 
@@ -135,17 +139,12 @@ void Infrastructure::RepositionInputCursor(bool initial)
 
 void Infrastructure::AddMessageToLog(std::string message)
 {
-    GetInstance().newLogsQueue.push(message);
-}
-
-void Infrastructure::AddMessageToLogQueue(std::string message)
-{
     CONSOLE_SCREEN_BUFFER_INFO csbi;
 
     HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
     GetConsoleScreenBufferInfo(h, &csbi);
 
-    COORD c = { GetInstance().GetCurrentLogXPos(), GetInstance().GetCurrentLogYPos()};
+    COORD c = { GetInstance().GetCurrentLogXPos(), GetInstance().GetCurrentLogYPos() };
 
     if ((csbi.srWindow.Bottom - 3) == GetInstance().GetCurrentLogYPos())
     {
@@ -167,6 +166,20 @@ void Infrastructure::AddMessageToLogQueue(std::string message)
 
     RepositionInputCursor(true);
     std::cout << GetUsernameInputFormatted(GetInstance().GetClientUserName());
+}
+
+void Infrastructure::AddMessageToLogQueue(std::string message)
+{
+    messagesEntries.push(message);
+    auto iterate = messagesEntries;
+    while(!iterate.empty()) {
+        GetInstance().SetQueues(iterate.front());
+        iterate.pop();
+   }
+ 
+  
+   /* GetInstance().newLogsQueue.emplace(messagesEntries);*/
+
 }
 
 

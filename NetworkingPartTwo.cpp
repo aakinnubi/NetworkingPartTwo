@@ -42,8 +42,12 @@ int main()
             kENetDefaultErrorMessage);
         exit(EXIT_FAILURE);
     }
-    auto clientUserName = Infrastructure::GetClientUserName();
-    Infrastructure::UserInput("Enter a name for the client user: ", [](std::string input) { return input != ""; }, clientUserName);
+    //std::string input;
+    //getline(std::cin, input);
+  
+    std::string clientUserName = "";
+        //Infrastructure::GetClientUserName();
+    Infrastructure::UserInput("Enter a name for the client user:  ", [](std::string input) { return input != ""; }, clientUserName);
 
     if (!Infrastructure::CreateClient())
     {
@@ -117,6 +121,7 @@ void LogQueueThread()
         if (Infrastructure::GetConnectedToServer() == true && Infrastructure::GetQueueSize() > 0)
         {
             std::lock_guard<std::mutex> consoleDrawGuard(consoleDraw);
+
             Infrastructure::AddMessageToLog(Infrastructure::GetQueueItem());
             Infrastructure::RemoveQueueItem();
         }
