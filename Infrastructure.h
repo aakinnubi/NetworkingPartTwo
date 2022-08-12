@@ -1,103 +1,88 @@
 #pragma once
-#include <enet/enet.h>
-#include <iostream>
-#include <functional>
 #include <queue>
+#include <enet/enet.h>
+#include <string>
 #include <mutex>
-using namespace std;
-enum ServerType
-{
-	Server = 1,
-	Client = 2
-};
+#include <functional>
 class Infrastructure {
 	Infrastructure() {
-		server = nullptr;
 		client = nullptr;
 	}
 	~Infrastructure() {
 
 	}
-
 public:
+
+
+	const short kLogStartXPos = 0;
+	const short kLogStartYPos = 7;
+	std::queue<std::string> newLogsQueue;
 	Infrastructure(Infrastructure& other) = delete;
 	static Infrastructure& GetInstance() {
 		static Infrastructure infrastructure;
 		return infrastructure;
 	}
 	void operator=(const Infrastructure&) = delete;
+	static bool CreateClient();
+	static ENetPeer* ConnectToServer();
 
-	static bool DidCreateServer(ServerType serverType);
-	static void SendPacketsWrapper();
-	static void ReceivePacketsWrapper();
-	static void HandleServerInput(string message);
-	static void HandleClientInput(string message);
-	static ServerType UserServerChoice(int userChoice);
-	static void Initializer();
-	static void KeepConnectionLive(bool status, ServerType connectionType);
-	static void EraseConsoleLine();
-	static void RepositionInputCursor(bool initial = false);
-	static void ClientInput(string message, function<bool(string)> func, string& storage);
-	static void SetupChatroomDisplay();
-	static void AddMessageToLog(string message);
-	static void AddMessageToLogQueue(string message);
-	static string GetUsernameInputFormatted(string username);
-	static void LogQueueThread();
-	static void WaitForUserInputThread(bool statusKeepLive, ServerType connectionType);
-	static void SetLogQueue(string message) {
-		GetInstance().newLogsQueue.push(message);
+	static void UserInput(std::string message, std::function<bool(std::string)> condition, std::string& storage);
+
+	//static void UserInputThread();
+	static void SetQueues(std::string queueItem) {
+		GetInstance().newLogsQueue.push(queueItem);
 	}
-	static string GetLogQueuePop() {
-		auto item = GetInstance().newLogsQueue.front();
-		GetInstance().newLogsQueue.pop();
-		return item;
-	}
-	static int GetQueueMessageSize() {
+	static int GetQueueSize() {
 		return GetInstance().newLogsQueue.size();
 	}
-	static void SetClientInputLength(string message) {
-		GetInstance().clientInputLength = message.length();
+	static std::string GetQueueItem() {
+		return GetInstance().newLogsQueue.front();
 	}
-	static int GetClientInputLength() {
-		return GetInstance().clientInputLength;
+	static void RemoveQueueItem() {
+		GetInstance().newLogsQueue.pop();
 	}
-	static void ConnectedToPeers();
-	static void SetIsConnected(bool status) {
-		GetInstance().isConnected = status;
-	}
-	static bool GetIsConnected() {
-		return GetInstance().isConnected;
-	}
-	const short g_kLogStartXPos = 0;
-	const short g_kLogStartYPos = 7;
-	int g_currentLogXPos = 0;
-	int g_currentLogYPos = 0;
-	int usernameCharLength = 0;
-	//string username;
-	//string fullname;
-	std::mutex consoleDrawer;
-private:
-	std::queue<std::string> newLogsQueue;
-	bool CreateServer(ServerType serverType);
-	void SendPackets(ENetEvent& event);
-	void ReceivePackets(ENetEvent& event);
-	void ConnectToPeers();
-	ENetAddress address = {};
-	ENetHost* server = nullptr;
-	ENetHost* client = nullptr;
-	ENetEvent event = {};
-	ENetPeer* peer = nullptr;
-	int clientInputLength = 0;
-	bool isConnected;
-	const string HELLO = "hello";
-	const string CLIENT = "Client> ";
-	const string SERVER = "Server> ";
-	const string HOST = "127.0.0.1";
-	const int PORT = 1234;
-	const char* ClientDefaultErrorMessage = "An error occurred while trying to create an ENet client host.\n";
-	const char* InfrastructureInitializingErrorMessage = "An error occurred while initializing ENet.\n";
-	const char* PeerAvialableMessage = "No available peers for initiating an ENet connection.\n";
+	static void SendPacket();
+	static void RepositionInputCursor(bool initial);
+	static void AddMessageToLog(std::string message);
+	static void AddMessageToLogQueue(std::string message);
 
-	const char* ConnectionSuccess = "Connection to 127.0.0.1:1234 succeeded.";
-	const char* ConnectionFailure = "Connection 127.0.0.1:1234 failed.";
+	static std::string GetUsernameInputFormatted(std::string username);
+	static void SetupChatroomDisplay();
+	static void EraseConsoleLine();
+	//==== Address =====
+	static ENetAddress GetAddress();
+	static void SetAddress(ENetAddress address);
+	//==== End Address =====
+	
+
+	//======= Client ======
+	static ENetHost* GetClient();
+	static void SetClient(ENetHost* client);
+	//======= End Client ======
+
+		//======= Client Username ======
+	static std::string GetClientUserName();
+	static void SetClientUserName(std::string username);
+	//======= End Client Username ======
+
+	static int GetClientUserNameInputLength();
+	static void SetClientUserNameInputLength(int clientUserNameInputLength);
+
+	static int GetCurrentLogXPos();
+	static int GetCurrentLogYPos();
+
+	static void SetCurrentLogXPos(int currentLogXPos);
+	static void SetCurrentLogYPos(int currentLogYPos);
+
+	static void SetConnectedToServer(bool status);
+	static bool GetConnectedToServer();
+private:
+	ENetAddress address;
+	ENetHost* client;
+	std::string clientUserName = "";
+	int clientUserNameInputLength = 0;
+	bool connectedToServer = false;
+	int currentLogXPos = 0;
+	int currentLogYPos = 0;
+
 };

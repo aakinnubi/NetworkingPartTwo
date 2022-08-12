@@ -23,13 +23,16 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Infrastructure.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="User.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Chat.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Infrastructure.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetworkingPartTwo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
