@@ -24,6 +24,7 @@ const char* kENetConnectionFailure = "Connection 127.0.0.1:1234 failed.";
 //const short g_kLogStartYPos = 7;
 void UserInputThread();
 void LogQueueThread();
+Infrastructure infrastructure = Infrastructure();
 int main()
 {
     std::cout << "Hello!  This program creates an ENet Client and waits for the user to exit before turning it off.\n\n";
@@ -36,7 +37,7 @@ int main()
     }
     atexit(enet_deinitialize);
 
-    if (!Infrastructure::CreateClient())
+    if (!infrastructure.CreateClient())
     {
         fprintf(stderr,
             kENetDefaultErrorMessage);
@@ -47,9 +48,9 @@ int main()
   
     std::string clientUserName = "";
         //Infrastructure::GetClientUserName();
-    Infrastructure::UserInput("Enter a name for the client user:  ", [](std::string input) { return input != ""; }, clientUserName);
+    infrastructure.UserInput("Enter a name for the client user:  ", [](std::string input) { return input != ""; }, clientUserName);
 
-    if (!Infrastructure::CreateClient())
+    if (!infrastructure.CreateClient())
     {
         fprintf(stderr,
             kENetDefaultErrorMessage);
@@ -57,7 +58,7 @@ int main()
     }
 
     ENetEvent event;
-    ENetPeer* peer = Infrastructure::ConnectToServer();
+    ENetPeer* peer = infrastructure.ConnectToServer();
 
     if (peer == NULL)
     {
@@ -66,12 +67,12 @@ int main()
         exit(EXIT_FAILURE);
     }
     /* Wait up to 5 seconds for the connection attempt to succeed. */
-    if (enet_host_service(Infrastructure::GetClient(), &event, 5000) > 0 &&
+    if (enet_host_service(infrastructure.GetClient(), &event, 5000) > 0 &&
         event.type == ENET_EVENT_TYPE_CONNECT)
     {
         std::cout << kENetConnectionSuccess << std::endl;
 
-        Infrastructure::SetConnectedToServer( true);
+        infrastructure.SetConnectedToServer( true);
     }
     else
     {
@@ -82,24 +83,24 @@ int main()
         std::cout << kENetConnectionFailure << std::endl;
     }
 
-    Infrastructure::SetupChatroomDisplay();
+    infrastructure.SetupChatroomDisplay();
     std::thread inputThread(UserInputThread);
     std::thread logQueueThread(LogQueueThread);
 
-    while (enet_host_service(Infrastructure::GetClient(), &event, 1200000) > 0)
+    while (enet_host_service(infrastructure.GetClient(), &event, 1200000) > 0)
     {
         switch (event.type)
         {
         case ENET_EVENT_TYPE_RECEIVE:
-            Infrastructure::AddMessageToLogQueue((char*)event.packet->data);
+            infrastructure.AddMessageToLogQueue((char*)event.packet->data);
             enet_packet_destroy(event.packet);
 
             break;
         }
     }
 
-    if (Infrastructure::GetClient() != nullptr)
-        enet_host_destroy(Infrastructure::GetClient());
+    if (infrastructure.GetClient() != nullptr)
+        enet_host_destroy(infrastructure.GetClient());
 
     return EXIT_SUCCESS;
 }
@@ -108,9 +109,9 @@ void UserInputThread()
 {
     while (true)
     {
-        if (Infrastructure::GetConnectedToServer() == true)
+        if (infrastructure.GetConnectedToServer() == true)
         {
-            Infrastructure::SendPacket();
+            infrastructure.SendPacket();
         }
     }
 }
@@ -118,12 +119,12 @@ void LogQueueThread()
 {
     while (true)
     {
-        if (Infrastructure::GetConnectedToServer() == true && Infrastructure::GetQueueSize() > 0)
+        if (infrastructure.GetConnectedToServer() == true && infrastructure.GetQueueSize() > 0)
         {
             std::lock_guard<std::mutex> consoleDrawGuard(consoleDraw);
 
-            Infrastructure::AddMessageToLog(Infrastructure::GetQueueItem());
-            Infrastructure::RemoveQueueItem();
+            infrastructure.AddMessageToLog(infrastructure.GetQueueItem());
+            infrastructure.RemoveQueueItem();
         }
     }
 }

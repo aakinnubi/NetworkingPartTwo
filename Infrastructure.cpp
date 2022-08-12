@@ -11,8 +11,8 @@ bool Infrastructure::CreateClient()
         2 /* allow up 2 channels to be used, 0 and 1 */,
         0 /* assume any amount of incoming bandwidth */,
         0 /* assume any amount of outgoing bandwidth */);
-   GetInstance().SetClient(client_);
-    return GetInstance().GetClient() != nullptr;
+   this->SetClient(client_);
+    return this->GetClient() != nullptr;
 }
 
 ENetPeer* Infrastructure::ConnectToServer()
@@ -23,7 +23,7 @@ ENetPeer* Infrastructure::ConnectToServer()
     address.port = 1234;
     /* Initiate the connection, allocating the two channels 0 and 1. */
 
-    return enet_host_connect(GetInstance().GetClient(), &address, 2, 0);
+    return enet_host_connect(this->GetClient(), &address, 2, 0);
 }
 
 void Infrastructure::UserInput(std::string message, std::function<bool(std::string)> condition, std::string& storage)
@@ -48,9 +48,9 @@ void Infrastructure::UserInput(std::string message, std::function<bool(std::stri
         }
         else
         {
-            GetInstance().SetClientUserName(input);
+            this->SetClientUserName(input);
 
-            std::cout << GetInstance().GetClientUserName() << std::endl;
+            std::cout << this->GetClientUserName() << std::endl;
             storage = input;
             exit = true;
         }
@@ -70,11 +70,11 @@ void Infrastructure::SetupChatroomDisplay()
     SetConsoleMode(h, consoleMode);
 
 
-    COORD c = { GetInstance().kLogStartXPos,  GetInstance().kLogStartYPos };
+    COORD c = { this->kLogStartXPos,  this->kLogStartYPos };
     SetConsoleCursorPosition(h, c);
 
-    GetInstance().SetCurrentLogXPos(GetInstance().kLogStartXPos);
-    GetInstance().SetCurrentLogYPos(GetInstance().kLogStartYPos + 1);
+    this->SetCurrentLogXPos(this->kLogStartXPos);
+    this->SetCurrentLogYPos(this->kLogStartYPos + 1);
 
     std::cout << "Welcome to the chat room!" << std::endl;
 }
@@ -84,8 +84,8 @@ void Infrastructure::SendPacket()
 
     std::string message = "";
     std::string packetMessage = "";
-
-    message = GetUsernameInputFormatted(GetInstance().GetClientUserName());
+    // there is a bug here too
+    message = GetUsernameInputFormatted(this->GetClientUserName());
 
     UserInput(message, [](std::string input) { return input != ""; }, packetMessage);
 
@@ -98,18 +98,19 @@ void Infrastructure::SendPacket()
         strlen(sendMessage) + 1,
         ENET_PACKET_FLAG_RELIABLE);
 
-    enet_host_broadcast(GetInstance().GetClient(), 0, packet);
+    enet_host_broadcast(this->GetClient(), 0, packet);
 
     /* One could just use enet_host_service() instead. */
-    enet_host_flush(GetInstance().GetClient());
+    enet_host_flush(this->GetClient());
 }
 std::string Infrastructure::GetUsernameInputFormatted(std::string username)
 {
     std::string message = "";
 
-    message += "@" + username + ": " + "";
-
-    GetInstance().SetClientUserNameInputLength(message.length());
+    //message += "@" + username + ": " + "";
+    message += "[" + username + "] >> ";
+    //there is a bug on this line
+   /* this->SetClientUserNameInputLength(message.length());*/
 
     return message;
 }
@@ -130,7 +131,7 @@ void Infrastructure::RepositionInputCursor(bool initial)
     }
     else
     {
-        c.X = GetInstance().GetClientUserNameInputLength();
+        c.X = this->GetClientUserNameInputLength();
         c.Y = bottomRow;
     }
 
@@ -144,9 +145,9 @@ void Infrastructure::AddMessageToLog(std::string message)
     HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
     GetConsoleScreenBufferInfo(h, &csbi);
 
-    COORD c = { GetInstance().GetCurrentLogXPos(), GetInstance().GetCurrentLogYPos() };
+    COORD c = { this->GetCurrentLogXPos(), this->GetCurrentLogYPos() };
 
-    if ((csbi.srWindow.Bottom - 3) == GetInstance().GetCurrentLogYPos())
+    if ((csbi.srWindow.Bottom - 3) == this->GetCurrentLogYPos())
     {
         SMALL_RECT srctWindow;
 
@@ -161,24 +162,17 @@ void Infrastructure::AddMessageToLog(std::string message)
 
     SetConsoleCursorPosition(h, c);
     std::cout << message;
-    auto currrentypos = GetInstance().GetCurrentLogYPos();
-    GetInstance().SetCurrentLogYPos(currrentypos++);
+    auto currrentypos = this->GetCurrentLogYPos();
+    this->SetCurrentLogYPos(currrentypos++);
 
     RepositionInputCursor(true);
-    std::cout << GetUsernameInputFormatted(GetInstance().GetClientUserName());
+    std::cout << GetUsernameInputFormatted(this->GetClientUserName());
 }
 
 void Infrastructure::AddMessageToLogQueue(std::string message)
 {
-    messagesEntries.push(message);
-    auto iterate = messagesEntries;
-    while(!iterate.empty()) {
-        GetInstance().SetQueues(iterate.front());
-        iterate.pop();
-   }
+    this->SetQueues(message);
  
-  
-   /* GetInstance().newLogsQueue.emplace(messagesEntries);*/
 
 }
 
@@ -197,66 +191,66 @@ void Infrastructure::EraseConsoleLine()
 
 ENetAddress Infrastructure::GetAddress()
 {
-    return GetInstance().address;
+    return this->address;
 }
 void Infrastructure::SetAddress(ENetAddress address)
 {
-    GetInstance().address = address;
+    this->address = address;
 }
 
 ENetHost* Infrastructure::GetClient()
 {
-    return GetInstance().client;
+    return this->client;
 }
 
 void Infrastructure::SetClient(ENetHost* client)
 {
-    GetInstance().client = client;
+    this->client = client;
 }
 
 std::string Infrastructure::GetClientUserName()
 {
-    return GetInstance().clientUserName;
+    return this->clientUserName;
 }
 
 void Infrastructure::SetClientUserName(std::string username)
 {
-    GetInstance().clientUserName = username;
+    this->clientUserName = username;
 }
 
 int Infrastructure::GetClientUserNameInputLength()
 {
-    return GetInstance().clientUserNameInputLength;
+    return this->clientUserNameInputLength;
 }
 
 void Infrastructure::SetClientUserNameInputLength(int clientUserNameInputLength)
 {
-    GetInstance().clientUserNameInputLength = clientUserNameInputLength;
+    this->clientUserNameInputLength = clientUserNameInputLength;
 }
 int Infrastructure::GetCurrentLogXPos()
 {
-    return GetInstance().currentLogXPos;
+    return this->currentLogXPos;
 }
 
 int Infrastructure::GetCurrentLogYPos()
 {
-    return GetInstance().currentLogYPos;
+    return this->currentLogYPos;
 }
 void Infrastructure::SetCurrentLogXPos(int currentLogXPos)
 {
-    GetInstance().currentLogXPos = currentLogXPos;
+    this->currentLogXPos = currentLogXPos;
 }
 void Infrastructure::SetCurrentLogYPos(int currentLogYPos)
 {
-    GetInstance().currentLogYPos = currentLogYPos;
+    this->currentLogYPos = currentLogYPos;
 }
 
 void Infrastructure::SetConnectedToServer(bool status)
 {
-    GetInstance().connectedToServer = status;
+    this->connectedToServer = status;
 }
 bool Infrastructure::GetConnectedToServer()
 {
-    return GetInstance().connectedToServer;
+    return this->connectedToServer;
 }
 

@@ -5,89 +5,80 @@
 #include <mutex>
 #include <functional>
 class Infrastructure {
-	//Infrastructure() {
-	//	client = nullptr;
-	//}
-	/*~Infrastructure() {
-
-	}*/
 public:
+	Infrastructure() {};
+	~Infrastructure() {
 
-
+	}
 	const short kLogStartXPos = 0;
 	const short kLogStartYPos = 7;
 	std::queue<std::string> nameEntryQueue;
-	Infrastructure(Infrastructure& other) = delete;
-	static Infrastructure& GetInstance() {
-		static Infrastructure infrastructure;
-		return infrastructure;
-	}
-	void operator=(const Infrastructure&) = delete;
-	static bool CreateClient();
-	static ENetPeer* ConnectToServer();
 
-	static void UserInput(std::string message, std::function<bool(std::string)> condition, std::string& storage);
+	bool CreateClient();
+	ENetPeer* ConnectToServer();
+
+	void UserInput(std::string message, std::function<bool(std::string)> condition, std::string& storage);
 
 	//static void UserInputThread();
-	static void SetQueues(std::string queueItem) {
-		Infrastructure::GetInstance().newLogsQueue.push(queueItem);
+	void SetQueues(std::string queueItem) {
+		this->newLogsQueue.push(queueItem);
 	}
 	//static void SetQueues(std::queue<std::string> queueItem) {
 	//	GetInstance().newLogsQueue.;
 	//}
-	static int GetQueueSize() {
-		return Infrastructure::GetInstance().newLogsQueue.size();
+	int GetQueueSize() {
+		return this->newLogsQueue.size();
 	}
-	static std::string GetQueueItem() {
-		return Infrastructure::GetInstance().newLogsQueue.front();
+	std::string GetQueueItem() {
+		return this->newLogsQueue.front();
 	}
-	static void RemoveQueueItem() {
-		Infrastructure::GetInstance().newLogsQueue.pop();
+	void RemoveQueueItem() {
+		this->newLogsQueue.pop();
 	}
-	static void SendPacket();
-	static void RepositionInputCursor(bool initial);
-	static void AddMessageToLog(std::string message);
-	static void AddMessageToLogQueue(std::string message);
+	void SendPacket();
+	void RepositionInputCursor(bool initial);
+	void AddMessageToLog(std::string message);
+	void AddMessageToLogQueue(std::string message);
 
-	static std::string GetUsernameInputFormatted(std::string username);
-	static void SetupChatroomDisplay();
-	static void EraseConsoleLine();
+	std::string GetUsernameInputFormatted(std::string username);
+	void SetupChatroomDisplay();
+	void EraseConsoleLine();
 	//==== Address =====
-	static ENetAddress GetAddress();
-	static void SetAddress(ENetAddress address);
+	ENetAddress GetAddress();
+	void SetAddress(ENetAddress address);
 	//==== End Address =====
-	
+
 
 	//======= Client ======
-	static ENetHost* GetClient();
-	static void SetClient(ENetHost* client);
+	ENetHost* GetClient();
+	void SetClient(ENetHost* client);
 	//======= End Client ======
 
 		//======= Client Username ======
-	static std::string GetClientUserName();
-	static void SetClientUserName(std::string username);
+	std::string GetClientUserName();
+	void SetClientUserName(std::string username);
 	//======= End Client Username ======
 
-	static int GetClientUserNameInputLength();
-	static void SetClientUserNameInputLength(int clientUserNameInputLength);
+	int GetClientUserNameInputLength();
+	void SetClientUserNameInputLength(int clientUserNameInputLength);
 
-	static int GetCurrentLogXPos();
-	static int GetCurrentLogYPos();
+	int GetCurrentLogXPos();
+	int GetCurrentLogYPos();
 
-	static void SetCurrentLogXPos(int currentLogXPos);
-	static void SetCurrentLogYPos(int currentLogYPos);
+	void SetCurrentLogXPos(int currentLogXPos);
+	void SetCurrentLogYPos(int currentLogYPos);
 
-	static void SetConnectedToServer(bool status);
-	static bool GetConnectedToServer();
+	void SetConnectedToServer(bool status);
+	bool GetConnectedToServer();
 private:
-	ENetAddress address;
-	ENetHost* client;
+	ENetAddress address{};
+	ENetHost* client{};
 	std::string clientUserName = "";
 	int clientUserNameInputLength = 0;
 	bool connectedToServer = false;
 	int currentLogXPos = 0;
 	int currentLogYPos = 0;
-	Infrastructure() {};
-	std::queue<std::string> newLogsQueue;
+
+	std::queue<std::string> newLogsQueue = {};
 
 };
