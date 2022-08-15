@@ -10,6 +10,7 @@ public:
 	~Infrastructure() {
 
 	}
+	std::queue<std::string> newLogsQueue;
 	const short kLogStartXPos = 0;
 	const short kLogStartYPos = 7;
 	std::queue<std::string> nameEntryQueue;
@@ -43,33 +44,84 @@ public:
 	std::string GetUsernameInputFormatted(std::string username);
 	void SetupChatroomDisplay();
 	void EraseConsoleLine();
-	//==== Address =====
-	ENetAddress GetAddress();
-	void SetAddress(ENetAddress address);
-	//==== End Address =====
+	void UserInputThread();
+	void LogQueueThread();
+	ENetAddress GetAddress()
+	{
+		return this->address;
+	}
+	void SetAddress(ENetAddress address)
+	{
+		this->address = address;
+	}
 
+	ENetHost* GetClient()
+	{
+		return this->client;
+	}
 
-	//======= Client ======
-	ENetHost* GetClient();
-	void SetClient(ENetHost* client);
-	//======= End Client ======
+	void SetClient(ENetHost* client)
+	{
+		this->client = client;
+	}
 
-		//======= Client Username ======
-	std::string GetClientUserName();
-	void SetClientUserName(std::string username);
-	//======= End Client Username ======
+	std::string GetClientUserName()
+	{
+		return this->clientUserName;
+	}
 
-	int GetClientUserNameInputLength();
-	void SetClientUserNameInputLength(int clientUserNameInputLength);
+	void SetClientUserName(std::string username)
+	{
+		this->clientUserName = username;
+	}
 
-	int GetCurrentLogXPos();
-	int GetCurrentLogYPos();
+	void SetMessageEntry(std::string input)
+	{
+		this->messageEntry = input;
+	}
 
-	void SetCurrentLogXPos(int currentLogXPos);
-	void SetCurrentLogYPos(int currentLogYPos);
+	std::string GetMessageEntry()
+	{
+		return this->messageEntry;
+	}
 
-	void SetConnectedToServer(bool status);
-	bool GetConnectedToServer();
+	int GetClientUserNameInputLength()
+	{
+		return this->clientUserNameInputLength;
+	}
+
+	void SetClientUserNameInputLength(int clientUserNameInputLength)
+	{
+		this->clientUserNameInputLength = clientUserNameInputLength;
+	}
+	int GetCurrentLogXPos()
+	{
+		return this->currentLogXPos;
+	}
+
+	int GetCurrentLogYPos()
+	{
+		return this->currentLogYPos;
+	}
+	void SetCurrentLogXPos(int currentLogXPos)
+	{
+		this->currentLogXPos = currentLogXPos;
+	}
+	void SetCurrentLogYPos(int currentLogYPos)
+	{
+		this->currentLogYPos = currentLogYPos;
+	}
+
+	void SetConnectedToServer(bool status)
+	{
+		this->connectedToServer = status;
+	}
+	bool GetConnectedToServer()
+	{
+		return this->connectedToServer;
+	}
+	void startNetwork();
+	int check_substring(std::string str1, std::string str2);
 private:
 	ENetAddress address{};
 	ENetHost* client{};
@@ -78,7 +130,6 @@ private:
 	bool connectedToServer = false;
 	int currentLogXPos = 0;
 	int currentLogYPos = 0;
-
-	std::queue<std::string> newLogsQueue = {};
+	std::string messageEntry = "";
 
 };

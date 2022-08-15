@@ -2,8 +2,15 @@
 #include <iostream>
 #include <string>
 #include <functional>
-std::mutex _consoleDraw;
+
+std::mutex consoleDraw;
 std::queue<std::string> messagesEntries;
+const char* kENetDefaultErrorMessage = "An error occurred while trying to create an ENet client host.\n";
+const char* kENetInitializingErrorMessage = "An error occurred while initializing ENet.\n";
+const char* kENetNoPeerAvialable = "No available peers for initiating an ENet connection.\n";
+
+const char* kENetConnectionSuccess = "Connection to 127.0.0.1:1234 succeeded.";
+const char* kENetConnectionFailure = "Connection 127.0.0.1:1234 failed.";
 bool Infrastructure::CreateClient()
 {
    auto client_ = enet_host_create(NULL /* create a client host */,
@@ -48,17 +55,61 @@ void Infrastructure::UserInput(std::string message, std::function<bool(std::stri
         }
         else
         {
-            this->SetClientUserName(input);
-
-            std::cout << this->GetClientUserName() << std::endl;
+            std::string hellomessage = "Enter a name for the client user";
+          
+            if (strstr(message.c_str(), hellomessage.c_str())) {
+                this->SetClientUserName(input);
+                storage = input;
+                exit = true;
+            }
+      //      else {
+      ///*          this->SetMessageEntry(input);*/
+      // 
+      //      }
             storage = input;
             exit = true;
         }
 
     } while (!exit);
 }
+int Infrastructure::check_substring(std::string str1, std::string str2)
+{
+    int i, j;
+    int len1 = str1.length();
+    int len2 = str2.length();
 
+    for (i = 0; i <= len2 - len1; i++) {
+        for (j = 0; j < len1; j++)
+            if (str2[i + j] != str1[j])
+                break;
 
+        if (j == len1)
+            return i;
+    }
+
+    return -1;
+}
+void Infrastructure::UserInputThread()
+{
+    while (true) {
+        if (this->GetConnectedToServer()) {
+            this->SendPacket();
+        }
+    }
+}
+void Infrastructure::LogQueueThread()
+{
+    while (true)
+    {
+        if (this->GetConnectedToServer() == true && this->newLogsQueue.size() > 0)
+        {
+            std::lock_guard<std::mutex> consoleDrawGuard(consoleDraw);
+
+            this->AddMessageToLog(this->newLogsQueue.front());
+            this->newLogsQueue.pop();
+        }
+    }
+}
 
 
 void Infrastructure::SetupChatroomDisplay()
@@ -86,14 +137,13 @@ void Infrastructure::SendPacket()
     std::string packetMessage = "";
     // there is a bug here too
     message = GetUsernameInputFormatted(this->GetClientUserName());
-
     UserInput(message, [](std::string input) { return input != ""; }, packetMessage);
-
+    if (!message.find("Enter a name for the client user:  ")) {
+        
+    }
     packetMessage = message + packetMessage;
 
     const char* sendMessage = packetMessage.c_str();
-
-    /* Create a reliable packet of size 7 containing "packet\0" */
     ENetPacket* packet = enet_packet_create(sendMessage,
         strlen(sendMessage) + 1,
         ENET_PACKET_FLAG_RELIABLE);
@@ -110,11 +160,11 @@ std::string Infrastructure::GetUsernameInputFormatted(std::string username)
     //message += "@" + username + ": " + "";
     message += "[" + username + "] >> ";
     //there is a bug on this line
-   /* this->SetClientUserNameInputLength(message.length());*/
+    this->SetClientUserNameInputLength(message.length());
 
     return message;
 }
-void Infrastructure::RepositionInputCursor(bool initial)
+void Infrastructure::RepositionInputCursor(bool initial = false)
 {
     CONSOLE_SCREEN_BUFFER_INFO csbi;
 
@@ -137,7 +187,12 @@ void Infrastructure::RepositionInputCursor(bool initial)
 
     SetConsoleCursorPosition(h, c);
 }
+void Infrastructure::AddMessageToLogQueue(std::string message)
+{
+    this->newLogsQueue.push(message);
 
+
+}
 void Infrastructure::AddMessageToLog(std::string message)
 {
     CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -162,23 +217,12 @@ void Infrastructure::AddMessageToLog(std::string message)
 
     SetConsoleCursorPosition(h, c);
     std::cout << message;
-    auto currrentypos = this->GetCurrentLogYPos();
-    this->SetCurrentLogYPos(currrentypos++);
+    auto currrentypos = this->GetCurrentLogYPos()+1;
+    this->SetCurrentLogYPos(currrentypos);
 
     RepositionInputCursor(true);
     std::cout << GetUsernameInputFormatted(this->GetClientUserName());
 }
-
-void Infrastructure::AddMessageToLogQueue(std::string message)
-{
-    this->SetQueues(message);
- 
-
-}
-
-
-
-
 void Infrastructure::EraseConsoleLine()
 {
     std::cout << "\33[2K";// Delete current line
@@ -189,68 +233,86 @@ void Infrastructure::EraseConsoleLine()
     std::cout << "\r"; // Resume the cursor at beginning of line
 }
 
-ENetAddress Infrastructure::GetAddress()
-{
-    return this->address;
-}
-void Infrastructure::SetAddress(ENetAddress address)
-{
-    this->address = address;
-}
 
-ENetHost* Infrastructure::GetClient()
-{
-    return this->client;
-}
 
-void Infrastructure::SetClient(ENetHost* client)
-{
-    this->client = client;
-}
 
-std::string Infrastructure::GetClientUserName()
-{
-    return this->clientUserName;
-}
 
-void Infrastructure::SetClientUserName(std::string username)
-{
-    this->clientUserName = username;
-}
 
-int Infrastructure::GetClientUserNameInputLength()
-{
-    return this->clientUserNameInputLength;
-}
+void Infrastructure::startNetwork() {
 
-void Infrastructure::SetClientUserNameInputLength(int clientUserNameInputLength)
-{
-    this->clientUserNameInputLength = clientUserNameInputLength;
-}
-int Infrastructure::GetCurrentLogXPos()
-{
-    return this->currentLogXPos;
-}
+    std::cout << "Hello!  This program creates an ENet Client and waits for the user to exit before turning it off.\n\n";
 
-int Infrastructure::GetCurrentLogYPos()
-{
-    return this->currentLogYPos;
-}
-void Infrastructure::SetCurrentLogXPos(int currentLogXPos)
-{
-    this->currentLogXPos = currentLogXPos;
-}
-void Infrastructure::SetCurrentLogYPos(int currentLogYPos)
-{
-    this->currentLogYPos = currentLogYPos;
-}
+    if (enet_initialize() != 0)
+    {
+        fprintf(stderr, kENetInitializingErrorMessage);
+        std::cout << kENetInitializingErrorMessage << std::endl;
+        return ;
+    }
+    atexit(enet_deinitialize);
 
-void Infrastructure::SetConnectedToServer(bool status)
-{
-    this->connectedToServer = status;
-}
-bool Infrastructure::GetConnectedToServer()
-{
-    return this->connectedToServer;
+    if (!this->CreateClient())
+    {
+        fprintf(stderr,
+            kENetDefaultErrorMessage);
+        exit(EXIT_FAILURE);
+    }
+    //std::string input;
+    //getline(std::cin, input);
+
+    std::string clientUserName = "";
+    //Infrastructure::GetClientUserName();
+    this->UserInput("Enter a name for the client user:  ", [](std::string input) { return input != ""; }, clientUserName);
+
+    if (!this->CreateClient())
+    {
+        fprintf(stderr,
+            kENetDefaultErrorMessage);
+        exit(EXIT_FAILURE);
+    }
+
+    ENetEvent event;
+    ENetPeer* peer = this->ConnectToServer();
+
+    if (peer == NULL)
+    {
+        fprintf(stderr,
+            kENetNoPeerAvialable);
+        exit(EXIT_FAILURE);
+    }
+    /* Wait up to 5 seconds for the connection attempt to succeed. */
+    if (enet_host_service(this->GetClient(), &event, 5000) > 0 &&
+        event.type == ENET_EVENT_TYPE_CONNECT)
+    {
+        std::cout << kENetConnectionSuccess << std::endl;
+
+        this->SetConnectedToServer(true);
+    }
+    else
+    {
+        /* Either the 5 seconds are up or a disconnect event was */
+        /* received. Reset the peer in the event the 5 seconds   */
+        /* had run out without any significant event.            */
+        enet_peer_reset(peer);
+        std::cout << kENetConnectionFailure << std::endl;
+    }
+
+    this->SetupChatroomDisplay();
+    std::thread inputThread(&Infrastructure::UserInputThread,this);
+    std::thread logQueueThread(&Infrastructure::LogQueueThread, this);
+
+    while (enet_host_service(this->GetClient(), &event, 1200000) > 0)
+    {
+        switch (event.type)
+        {
+        case ENET_EVENT_TYPE_RECEIVE:
+            this->AddMessageToLogQueue((char*)event.packet->data);
+            enet_packet_destroy(event.packet);
+
+            break;
+        }
+    }
+
+    if (this->GetClient() != nullptr)
+        enet_host_destroy(this->GetClient());
 }
 

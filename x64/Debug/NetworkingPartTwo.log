@@ -1,5 +1,8 @@
 ﻿  Infrastructure.cpp
-C:\Users\aakinnubi\source\repos\NetworkingPartTwo\Infrastructure.h(30,1): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\aakinnubi\source\repos\NetworkingPartTwo\Infrastructure.cpp(148,40): warning C4838: conversion from 'int' to 'SHORT' requires a narrowing conversion
-C:\Users\aakinnubi\source\repos\NetworkingPartTwo\Infrastructure.cpp(148,67): warning C4838: conversion from 'int' to 'SHORT' requires a narrowing conversion
+C:\Users\aakinnubi\source\repos\NetworkingPartTwo\Infrastructure.h(31,1): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\aakinnubi\source\repos\NetworkingPartTwo\Infrastructure.cpp(78,29): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\aakinnubi\source\repos\NetworkingPartTwo\Infrastructure.cpp(79,29): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\aakinnubi\source\repos\NetworkingPartTwo\Infrastructure.cpp(163,56): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\aakinnubi\source\repos\NetworkingPartTwo\Infrastructure.cpp(203,40): warning C4838: conversion from 'int' to 'SHORT' requires a narrowing conversion
+C:\Users\aakinnubi\source\repos\NetworkingPartTwo\Infrastructure.cpp(203,67): warning C4838: conversion from 'int' to 'SHORT' requires a narrowing conversion
   NetworkingPartTwo.vcxproj -> C:\Users\aakinnubi\source\repos\NetworkingPartTwo\x64\Debug\NetworkingPartTwo.exe
