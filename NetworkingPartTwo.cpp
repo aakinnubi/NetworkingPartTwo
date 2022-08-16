@@ -20,32 +20,11 @@
 //void UserInputThread();
 //void LogQueueThread();
 Infrastructure infrastructure = Infrastructure();
+Infrastructure serverInfrastructure = Infrastructure(9000, 32, 24, 0, 0);
 int main()
 {
-    infrastructure.startNetwork();
+    serverInfrastructure.startServerNetwork();
+    infrastructure.startClientNetwork();
     return EXIT_SUCCESS;
 }
 
-//void UserInputThread()
-//{
-//    while (true)
-//    {
-//        if (infrastructure.GetConnectedToServer() == true)
-//        {
-//            infrastructure.SendPacket();
-//        }
-//    }
-//}
-//void LogQueueThread()
-//{
-//    while (true)
-//    {
-//        if (infrastructure.GetConnectedToServer() == true && infrastructure.GetQueueSize() > 0)
-//        {
-//            std::lock_guard<std::mutex> consoleDrawGuard(consoleDraw);
-//
-//            infrastructure.AddMessageToLog(infrastructure.GetQueueItem());
-//            infrastructure.RemoveQueueItem();
-//        }
-//    }
-//}

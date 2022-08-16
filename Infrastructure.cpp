@@ -21,6 +21,16 @@ bool Infrastructure::CreateClient()
    this->SetClient(client_);
     return this->GetClient() != nullptr;
 }
+bool Infrastructure::CreateServer(int port) {
+    Infrastructure::SetAddressPort(port);
+    auto server_ = enet_host_create(&address,
+        32,
+        2,
+        0,
+        0);
+    this->SetClient(server_);
+    return this->GetClient() != nullptr;
+}
 
 ENetPeer* Infrastructure::ConnectToServer()
 {
@@ -153,6 +163,16 @@ void Infrastructure::SendPacket()
     /* One could just use enet_host_service() instead. */
     enet_host_flush(this->GetClient());
 }
+void Infrastructure::SendPacket(std::string message) {
+
+    ENetPacket* packet = enet_packet_create(message.c_str(),
+        strlen(message.c_str()) + 1,
+        ENET_PACKET_FLAG_RELIABLE);
+    enet_host_broadcast(Infrastructure::GetClient(), 0, packet);
+
+    /* One could just use enet_host_service() instead. */
+    enet_host_flush(Infrastructure::GetClient());
+}
 std::string Infrastructure::GetUsernameInputFormatted(std::string username)
 {
     std::string message = "";
@@ -234,11 +254,21 @@ void Infrastructure::EraseConsoleLine()
 }
 
 
+void Infrastructure::DisplayConnectionMessage(ENetEvent event) {
+    std::cout << "A new client connected from "
+        << event.peer->address.host
+        << ":" << event.peer->address.port
+        << "\n";
+}
 
+void Infrastructure::DisplayDisconnectMessage(ENetEvent event) {
+    std::cout << "The client from "
+        << event.peer->address.host
+        << ":" << event.peer->address.port
+        << " has disconnected.\n";
+}
 
-
-
-void Infrastructure::startNetwork() {
+void Infrastructure::startClientNetwork() {
 
     std::cout << "Hello!  This program creates an ENet Client and waits for the user to exit before turning it off.\n\n";
 
@@ -316,3 +346,54 @@ void Infrastructure::startNetwork() {
         enet_host_destroy(this->GetClient());
 }
 
+void Infrastructure::startServerNetwork() {
+    std::cout << "Hello!  This program creates an ENet Server and waits for the user to exit before turning it off.\n\n";
+
+    if (enet_initialize() != 0)
+    {
+        fprintf(stderr, "An error occurred while initializing ENet.\n");
+        std::cout << "An error occurred while initializing ENet.\n" << std::endl;
+        return;
+    }
+    atexit(enet_deinitialize);
+
+    if (!Infrastructure::CreateServer(9000))
+    {
+        fprintf(stderr,
+            "An error occurred while trying to create an ENet server host.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    std::cout << "Server startup complete!  Waiting for clients to connect. . .\n";
+    int currentCount = 0;
+    ENetEvent event;
+    while (enet_host_service(Infrastructure::GetClient(), &event, 1200000) > 0)
+    {
+        switch (event.type)
+        {
+        case ENET_EVENT_TYPE_CONNECT:
+            Infrastructure::DisplayConnectionMessage(event);
+            //event.peer->data = (void*)("Client information");
+            currentCount = Infrastructure::GetConnectedCount();
+            currentCount = currentCount + 1;
+            Infrastructure::SetConnectedCount(currentCount);
+
+            break;
+        case ENET_EVENT_TYPE_RECEIVE:
+            std::cout << event.packet->data << std::endl;
+            Infrastructure::SendPacket((char*)event.packet->data);
+            enet_packet_destroy(event.packet);
+
+            break;
+        case ENET_EVENT_TYPE_DISCONNECT:
+            Infrastructure::DisplayDisconnectMessage(event);
+            currentCount = Infrastructure::GetConnectedCount();
+            currentCount = currentCount - 1;
+            Infrastructure::SetConnectedCount(currentCount);
+            break;
+        }
+    }
+
+    if (Infrastructure::GetClient() != nullptr)
+        enet_host_destroy(Infrastructure::GetClient());
+}
